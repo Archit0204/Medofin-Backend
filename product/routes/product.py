@@ -2,13 +2,27 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import Annotated
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from methods.alternative import getAlternateMeds
 import models
-from methods.getDb import get_db
 
 MAX_LIMIT = 15
 
 product = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def getAlternateMeds(filter, countNeeded, db, index):
+    
+    if (index == 2):
+        alternateMeds = db.query(models.Medicine).filter(models.Medicine.salt == filter).limit(countNeeded).all()
+    elif (index == 3):
+        alternateMeds = db.query(models.Medicine).filter(models.Medicine.symptom == filter).limit(countNeeded).all()
+
+    return alternateMeds
 
 @product.get("/fetch/medicine/", status_code = status.HTTP_200_OK)
 def fetchMedicine(db: Annotated[Session , Depends(get_db)], value: str | None, index: int = None):
@@ -56,4 +70,5 @@ def fetchMedicine(db: Annotated[Session , Depends(get_db)], value: str | None, i
             'alternatives': alternateMeds
         }
     }
+
     # return "sucess"

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from . import app as run
+from product import app as run
 
 app = FastAPI()
 
